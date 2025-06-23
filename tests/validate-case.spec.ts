@@ -93,7 +93,7 @@ test.describe('Valid case data', () => {
         });
     });
 
-    // Check all valid patient_id assigning authorities
+    // Check all valid patient_id assigning authority
     [
         {assigning_authority: 'BCV'},
         {assigning_authority: 'ISO'},
