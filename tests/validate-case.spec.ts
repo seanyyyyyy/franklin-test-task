@@ -140,129 +140,6 @@ test.describe('Valid case data', () => {
     });
 });
 
-test.describe('Invalid content type', () => {
-    const expectedStatus = 415;
-
-    test('reject non-JSON content type', async ({request}) => {
-        const response = await request.post(endpoint, {
-            headers: {
-                'Content-Type': 'text/plain; charset=UTF-8'
-            },
-            data: {
-                case_id: crypto.randomUUID(),
-                patient_id: "1234567^1^ISO^NN123^MC",
-                patient_name: "Smith^John",
-                dob: "19700401",
-                tissue_type: "prostate"
-            }
-        });
-        expect(response.status()).toEqual(expectedStatus);
-    });
-});
-
-test.describe('Check mandatory fields', () => {
-    const expectedStatus = 400;
-
-    test('check mandatory field: case_id', async ({request}) => {
-        const newCase = await request.post(endpoint, {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            data: {
-                //case_id: 'a474e3e6-89ad-4bb9-be00-cba347e2a001',
-                patient_id: "1234567^1^ISO^NN123^MC",
-                patient_name: "Smith^John",
-                dob: "19700401",
-                tissue_type: "prostate"
-            }
-        });
-        expect(newCase.status()).toEqual(expectedStatus);
-        const newCaseBody = await newCase.json();
-        expect(newCaseBody).toEqual({
-            message: 'Missing case id'
-        });
-    });
-
-    test('check mandatory field: patient_id', async ({request}) => {
-        const newCase = await request.post(endpoint, {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            data: {
-                case_id: crypto.randomUUID(),
-                //patient_id: "1234567^1^ISO^NN123^MC",
-                patient_name: "Smith^John",
-                dob: "19700401",
-                tissue_type: "prostate"
-            }
-        });
-        expect(newCase.status()).toEqual(expectedStatus);
-        const newCaseBody = await newCase.json();
-        expect(newCaseBody).toEqual({
-            message: 'Missing patient_id'
-        });
-    });
-
-    test('check mandatory field: patient_name', async ({request}) => {
-        const newCase = await request.post(endpoint, {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            data: {
-                case_id: crypto.randomUUID(),
-                patient_id: "1234567^1^ISO^NN123^MC",
-                //patient_name: "Smith^John",
-                dob: "19700401",
-                tissue_type: "prostate"
-            }
-        });
-        expect(newCase.status()).toEqual(expectedStatus);
-        const newCaseBody = await newCase.json();
-        expect(newCaseBody).toEqual({
-            message: 'Missing patient_name'
-        });
-    });
-    test('check mandatory field: dob', async ({request}) => {
-        const newCase = await request.post(endpoint, {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            data: {
-                case_id: crypto.randomUUID(),
-                patient_id: "1234567^1^ISO^NN123^MC",
-                patient_name: "Smith^John",
-                //dob: "19700401",
-                tissue_type: "prostate"
-            }
-        });
-        expect(newCase.status()).toEqual(expectedStatus);
-        const newCaseBody = await newCase.json();
-        expect(newCaseBody).toEqual({
-            message: 'Missing dob'
-        });
-    });
-
-    test('check mandatory field: tissue_type', async ({request}) => {
-        const newCase = await request.post(endpoint, {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            data: {
-                case_id: crypto.randomUUID(),
-                patient_id: "1234567^1^ISO^NN123^MC",
-                patient_name: "Smith^John",
-                dob: "19700401",
-                //tissue_type: "prostate"
-            }
-        });
-        expect(newCase.status()).toEqual(expectedStatus);
-        const newCaseBody = await newCase.json();
-        expect(newCaseBody).toEqual({
-            message: 'Missing tissue_type'
-        });
-    });
-});
-
 test.describe('Invalid case data', () => {
     const expectedStatus = 422;
 
@@ -500,6 +377,148 @@ test.describe('Invalid patient_id data', () => {
         const newCaseBody = await newCase.json();
         expect(newCaseBody).toEqual({
             message: 'Invalid patient_id'
+        });
+    });
+});
+
+test.describe('Invalid content type', () => {
+    const expectedStatus = 415;
+
+    [
+        {content_type: 'application/xml'},
+        {content_type: 'text/plain; charset=UTF-8'}
+    ].forEach(({content_type}) => {
+        test(`reject non-JSON content type: ${content_type}`, async ({request}) => {
+            const response = await request.post(endpoint, {
+                headers: {
+                    'Content-Type': `${content_type}`
+                },
+                data: {
+                    case_id: crypto.randomUUID(),
+                    patient_id: "1234567^1^ISO^NN123^MC",
+                    patient_name: "Smith^John",
+                    dob: "19700401",
+                    tissue_type: "prostate"
+                }
+            });
+            expect(response.status()).toEqual(expectedStatus);
+        });
+    });
+
+    test('no Content-Type header', async ({request}) => {
+        const response = await request.post(endpoint, {
+            headers: {},
+            data: {
+                case_id: crypto.randomUUID(),
+                patient_id: "1234567^1^ISO^NN123^MC",
+                patient_name: "Smith^John",
+                dob: "19700401",
+                tissue_type: "prostate"
+            }
+        });
+        expect(response.status()).toEqual(expectedStatus);
+    });
+});
+
+test.describe('Check mandatory fields', () => {
+    const expectedStatus = 400;
+
+    test('check mandatory field: case_id', async ({request}) => {
+        const newCase = await request.post(endpoint, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: {
+                //case_id: 'a474e3e6-89ad-4bb9-be00-cba347e2a001',
+                patient_id: "1234567^1^ISO^NN123^MC",
+                patient_name: "Smith^John",
+                dob: "19700401",
+                tissue_type: "prostate"
+            }
+        });
+        expect(newCase.status()).toEqual(expectedStatus);
+        const newCaseBody = await newCase.json();
+        expect(newCaseBody).toEqual({
+            message: 'Missing case id'
+        });
+    });
+
+    test('check mandatory field: patient_id', async ({request}) => {
+        const newCase = await request.post(endpoint, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: {
+                case_id: crypto.randomUUID(),
+                //patient_id: "1234567^1^ISO^NN123^MC",
+                patient_name: "Smith^John",
+                dob: "19700401",
+                tissue_type: "prostate"
+            }
+        });
+        expect(newCase.status()).toEqual(expectedStatus);
+        const newCaseBody = await newCase.json();
+        expect(newCaseBody).toEqual({
+            message: 'Missing patient_id'
+        });
+    });
+
+    test('check mandatory field: patient_name', async ({request}) => {
+        const newCase = await request.post(endpoint, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: {
+                case_id: crypto.randomUUID(),
+                patient_id: "1234567^1^ISO^NN123^MC",
+                //patient_name: "Smith^John",
+                dob: "19700401",
+                tissue_type: "prostate"
+            }
+        });
+        expect(newCase.status()).toEqual(expectedStatus);
+        const newCaseBody = await newCase.json();
+        expect(newCaseBody).toEqual({
+            message: 'Missing patient_name'
+        });
+    });
+    test('check mandatory field: dob', async ({request}) => {
+        const newCase = await request.post(endpoint, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: {
+                case_id: crypto.randomUUID(),
+                patient_id: "1234567^1^ISO^NN123^MC",
+                patient_name: "Smith^John",
+                //dob: "19700401",
+                tissue_type: "prostate"
+            }
+        });
+        expect(newCase.status()).toEqual(expectedStatus);
+        const newCaseBody = await newCase.json();
+        expect(newCaseBody).toEqual({
+            message: 'Missing dob'
+        });
+    });
+
+    test('check mandatory field: tissue_type', async ({request}) => {
+        const newCase = await request.post(endpoint, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: {
+                case_id: crypto.randomUUID(),
+                patient_id: "1234567^1^ISO^NN123^MC",
+                patient_name: "Smith^John",
+                dob: "19700401",
+                //tissue_type: "prostate"
+            }
+        });
+        expect(newCase.status()).toEqual(expectedStatus);
+        const newCaseBody = await newCase.json();
+        expect(newCaseBody).toEqual({
+            message: 'Missing tissue_type'
         });
     });
 });
