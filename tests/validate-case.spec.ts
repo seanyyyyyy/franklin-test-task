@@ -7,9 +7,6 @@ test.describe('Valid case data', () => {
 
     test('check valid example case', async ({request}) => {
         const newCase = await request.post(endpoint, {
-            // headers: {
-            //     'Content-Type': 'application/json'
-            // },
             data: {
                 case_id: 'a474e3e6-89ad-4bb9-be00-cba347e2a001',
                 patient_id: "1234567^1^ISO^NN123^MC",
